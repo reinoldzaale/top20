@@ -1,0 +1,209 @@
+<title>REINOLD :: TOP 20 SPOTIFY</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: one terminal column, boot log -> letter-spaced header -> command -> ASCII chart table -> EOF footer.
+   Single dark theme on purpose: mirrors reinold.uk (1984 CRT terminal, monochrome). */
+:root {
+  color-scheme: dark;
+  --bg: oklch(8% 0 0);
+  --bg-hi: oklch(14% 0 0);
+  --bg-lo: oklch(6% 0 0);
+  --fg: oklch(95% 0 0);
+  --dim: oklch(65% 0 0);
+  --faint: oklch(42% 0 0);
+  --line: oklch(35% 0 0);
+  --font: "Noto Sans Mono", ui-monospace, Consolas, "Courier New", monospace;
+}
+html, body { background-color: var(--bg); color: var(--fg); }
+body {
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+  background-image: repeating-linear-gradient(0deg, #ffffff14 0 1px, #0000 1px 3px),
+                    radial-gradient(var(--bg-hi) 0%, var(--bg-lo) 100%);
+  background-attachment: fixed;
+}
+.crt::before { content: ""; pointer-events: none; z-index: 50; position: fixed; inset: 0;
+  background: radial-gradient(#0000 55%, #0009 100%); }
+.crt::after { content: ""; pointer-events: none; z-index: 51; position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, #ffffff08 0 2px, #0000 2px 4px);
+  animation: flicker 4s infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1 } 50% { opacity: .92 } }
+@keyframes blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+.cursor { display: inline-block; width: .6em; height: 1em; background: currentColor;
+  vertical-align: text-bottom; animation: blink 1s steps(2, end) infinite; }
+@media (prefers-reduced-motion: reduce) { .crt::after, .cursor { animation: none; } }
+
+main {
+  max-width: 62rem; margin: 0 auto;
+  padding-block: 2.5rem 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 2rem;
+}
+a { color: inherit; text-decoration: none; }
+a:focus-visible, button:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
+.boot { white-space: pre-wrap; color: var(--fg); font-size: .9rem; line-height: 1.55; }
+.boot .ok { color: var(--fg); }
+.hero { text-align: center; display: grid; gap: .25rem; }
+.hero h1 { font-weight: 400; font-size: clamp(1.15rem, 3.6vw, 1.75rem); letter-spacing: .45em;
+  line-height: 1.3; text-wrap: balance; }
+.hero h1 span { color: var(--dim); letter-spacing: 0; }
+.tags { color: var(--dim); font-size: .85rem; letter-spacing: .05em; text-align: center; }
+.block { display: grid; gap: .9rem; min-width: 0; }
+.prompt { font-size: 1.05rem; }
+.prompt .path { color: var(--dim); }
+.meta { color: var(--dim); font-size: .85rem; white-space: pre-wrap; }
+.meta b { color: var(--fg); font-weight: 400; }
+
+/* ASCII chart */
+.chart { margin: 0; font-family: var(--font); font-size: 13px; line-height: 1.6; white-space: pre;
+  overflow-x: auto; font-variant-numeric: tabular-nums; color: var(--dim); }
+.chart .row { display: inline; color: var(--fg); cursor: pointer; }
+.chart .row:hover, .chart .row.sel { background: var(--fg); color: var(--bg); }
+.chart .hd { color: var(--dim); }
+.chart .up { }
+.legend { color: var(--dim); font-size: .8rem; }
+.hint { color: var(--dim); font-size: .8rem; }
+#measure { position: absolute; visibility: hidden; white-space: pre; font: 13px var(--font); }
+
+footer { display: grid; gap: .35rem; color: var(--dim); padding-top: 1rem; font-size: .95rem; }
+footer a { border-bottom: 1px dotted var(--dim); }
+footer a:hover { color: var(--fg); border-color: var(--fg); }
+@media (max-width: 480px) { body { font-size: 14px; } .boot { font-size: .8rem; } }
+</style>
+
+<div class="crt"></div>
+<main>
+  <section class="boot" aria-label="System log" id="boot"></section>
+
+  <header class="hero">
+    <h1>TOP&nbsp;20 <span>//</span> SPOTIFY</h1>
+    <p class="tags">[ GLOBAL // DAILY // STREAMS // <span id="tagDate">----</span> ]</p>
+  </header>
+
+  <section class="block" aria-labelledby="cmd">
+    <p class="prompt" id="cmd"><span class="path">C:\REINOLD&gt;</span> ./charts --spotify --global --top 20</p>
+    <p class="meta" id="meta"></p>
+    <pre class="chart" id="chart" role="list" aria-label="Spotify Top 20 tracks"></pre>
+    <p class="hint">USE MOUSE OR ARROW KEYS · ENTER = OPEN IN SPOTIFY</p>
+    <p class="legend">▲ UP · ▼ DOWN · = SAME · NEW = FIRST DAY ON CHART · RE = RE-ENTRY · BAR = STREAMS VS #1</p>
+  </section>
+
+  <footer>
+    <p>C:\REINOLD&gt; <span class="cursor" aria-hidden="true"></span></p>
+    <p>— END OF FILE — NEXT UPDATE IN 24H</p>
+    <p>SOURCE: <a href="https://charts.spotify.com/charts/view/regional-global-daily/latest" target="_blank" rel="noopener">Spotify Charts</a> via <a href="https://kworb.net/spotify/country/global_daily.html" target="_blank" rel="noopener">kworb.net</a> · <a href="https://reinold.uk" target="_blank" rel="noopener">reinold.uk</a></p>
+    <p>© <span id="year">2026</span> R. ZAALE</p>
+  </footer>
+</main>
+<span id="measure">0000000000</span>
+
+<script>
+const DATA = "__CHART_DATA__";
+
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => n == null ? "—" : n.toLocaleString("en-US");
+const signed = (n) => n == null ? "" : (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n).toLocaleString("en-US");
+const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const [y, mo, d] = DATA.chartDate.split("-").map(Number);
+const dateLabel = `${String(d).padStart(2,"0")}-${months[mo-1]}-${y}`;
+$("year").textContent = y;
+$("tagDate").textContent = dateLabel;
+
+function move(m) {
+  if (!m || m === "=") return "=";
+  if (/^\+\d+/.test(m)) return "▲" + m.slice(1);
+  if (/^-\d+/.test(m)) return "▼" + m.slice(1);
+  return m.toUpperCase().slice(0, 4);
+}
+const pad = (s, n) => { s = String(s); return s.length > n ? s.slice(0, n - 1) + "…" : s + " ".repeat(n - s.length); };
+const lpad = (s, n) => { s = String(s); return s.length >= n ? s.slice(-n) : " ".repeat(n - s.length) + s; };
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// boot log
+const dots = (label, w = 40) => label + ".".repeat(Math.max(3, w - label.length)) + "[OK]";
+const updated = new Date(DATA.updatedAt);
+$("boot").textContent = [
+  "ZAALE-DOS v.12-9-1984  (C)",
+  "OLD SCHOOL CRAFT 640K",
+  "OK",
+  dots("CONNECTING spotify://charts/global"),
+  dots("LOADING DAILY_TOP200.DAT"),
+  dots("SORTING BY STREAMS"),
+  dots("TRUNCATING TO 20"),
+  "READY."
+].join("\n");
+
+const total = DATA.tracks.reduce((s, t) => s + (t.streams || 0), 0);
+$("meta").innerHTML =
+  `CHART DATE  : <b>${dateLabel}</b>  (latest day published by Spotify)\n` +
+  `TOTAL TOP 20: <b>${fmt(total)}</b> streams in 24h\n` +
+  `REFRESHED   : ${updated.toISOString().slice(0,16).replace("T"," ")} UTC`;
+
+const chartEl = $("chart");
+const max = DATA.tracks[0].streams || 1;
+let sel = -1;
+
+function charWidth() { return $("measure").getBoundingClientRect().width / 10 || 7.8; }
+
+function render() {
+  const cols = Math.floor(chartEl.clientWidth / charWidth()) - 1;
+  const wide = cols >= 78;
+  let out = "";
+  if (wide) {
+    const W = { pos: 3, mv: 5, trk: 0, bar: 10, str: 11, dlt: 10, day: 4, pk: 4 };
+    const fixed = W.pos + W.mv + W.bar + W.str + W.dlt + W.day + W.pk + 3 * 8 + 1;
+    W.trk = Math.max(24, Math.min(56, cols - fixed));
+    const sep = "+" + [W.pos, W.mv, W.trk, W.bar, W.str, W.dlt, W.day, W.pk].map((w) => "-".repeat(w + 2)).join("+") + "+";
+    const line = (c) => "| " + c.join(" | ") + " |";
+    out += sep + "\n" + `<span class="hd">${esc(line([pad("#",W.pos), pad("MOVE",W.mv), pad("TRACK — ARTIST",W.trk), pad("SHARE",W.bar), lpad("STREAMS",W.str), lpad("24H Δ",W.dlt), lpad("DAYS",W.day), lpad("PEAK",W.pk)]))}</span>\n` + sep + "\n";
+    DATA.tracks.forEach((t, i) => {
+      const name = `${t.title}${t.feat ? " " + t.feat : ""} — ${t.artist}`;
+      const n = Math.round((t.streams / max) * W.bar);
+      const bar = "█".repeat(n) + "░".repeat(W.bar - n);
+      const txt = line([lpad(String(t.pos).padStart(2,"0"),W.pos), pad(move(t.move),W.mv), pad(name,W.trk), bar, lpad(fmt(t.streams),W.str), lpad(signed(t.delta),W.dlt), lpad(t.days ?? "",W.day), lpad(t.peak ?? "",W.pk)]);
+      out += `<a class="row" role="listitem" data-i="${i}" href="https://open.spotify.com/track/${t.id}" target="_blank" rel="noopener" title="${esc(name)}">${esc(txt)}</a>\n`;
+    });
+    out += sep;
+  } else {
+    const w = Math.max(28, cols);
+    const rule = "-".repeat(w);
+    out += rule + "\n";
+    DATA.tracks.forEach((t, i) => {
+      const head = `#${String(t.pos).padStart(2,"0")} ${pad(move(t.move),4)} `;
+      const ind = " ".repeat(head.length);
+      const body = w - head.length;
+      const n = Math.round((t.streams / max) * 10);
+      const txt = head + pad(t.title + (t.feat ? " " + t.feat : ""), body) + "\n" +
+                  ind + pad(t.artist, body) + "\n" +
+                  ind + pad(`${"█".repeat(n)}${"░".repeat(10-n)} ${fmt(t.streams)}`, body);
+      out += `<a class="row" role="listitem" data-i="${i}" href="https://open.spotify.com/track/${t.id}" target="_blank" rel="noopener">${esc(txt)}</a>\n` + rule + "\n";
+    });
+  }
+  chartEl.innerHTML = out;
+  if (sel >= 0) highlight(sel, false);
+}
+
+function highlight(i, scroll = true) {
+  sel = i;
+  chartEl.querySelectorAll(".row").forEach((r) => r.classList.toggle("sel", Number(r.dataset.i) === i));
+  const el = chartEl.querySelector(`.row[data-i="${i}"]`);
+  if (scroll && el) el.scrollIntoView({ block: "nearest" });
+}
+chartEl.addEventListener("mouseover", (e) => { const r = e.target.closest(".row"); if (r) highlight(Number(r.dataset.i), false); });
+document.addEventListener("keydown", (e) => {
+  const n = DATA.tracks.length;
+  if (e.key === "ArrowDown") { e.preventDefault(); highlight((sel + 1) % n); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); highlight((sel - 1 + n) % n); }
+  else if (e.key === "Enter" && sel >= 0) { chartEl.querySelector(`.row[data-i="${sel}"]`)?.click(); }
+});
+
+render();
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 80); });
+document.fonts?.ready.then(render);
+</script>
